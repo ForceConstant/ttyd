@@ -18,7 +18,7 @@ LIBWEBSOCKETS_VERSION="${LIBWEBSOCKETS_VERSION:-4.5.7}"
 
 build_zlib() {
     echo "=== Building zlib-${ZLIB_VERSION} (${TARGET})..."
-    curl -fSsLo- "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
+    curl --retry 3 --retry-delay 5 -fSsLo- "https://github.com/madler/zlib/archive/refs/tags/v${ZLIB_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
     pushd "${BUILD_DIR}"/zlib-"${ZLIB_VERSION}"
         env CHOST="${TARGET}" ./configure --static --archs="-fPIC" --prefix="${STAGE_DIR}" --disable-crcvx
         make -j"$(nproc)" install
@@ -27,7 +27,7 @@ build_zlib() {
 
 build_json-c() {
     echo "=== Building json-c-${JSON_C_VERSION} (${TARGET})..."
-    curl -fSsLo- "https://s3.amazonaws.com/json-c_releases/releases/json-c-${JSON_C_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
+    curl --retry 3 --retry-delay 5 -fSsLo- "https://s3.amazonaws.com/json-c_releases/releases/json-c-${JSON_C_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
     pushd "${BUILD_DIR}/json-c-${JSON_C_VERSION}"
         rm -rf build && mkdir -p build && cd build
         cmake -DCMAKE_TOOLCHAIN_FILE="${BUILD_DIR}/cross-${TARGET}.cmake" \
@@ -60,7 +60,7 @@ map_openssl_target() {
 build_openssl() {
     openssl_target=$(map_openssl_target "${BUILD_TARGET}")
     echo "=== Building openssl-${OPENSSL_VERSION} (${openssl_target})..."
-    curl -sLo- "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
+    curl --retry 3 --retry-delay 5 -fSsLo- "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
     pushd "${BUILD_DIR}/openssl-${OPENSSL_VERSION}"
         openssl_cflags="-fPIC -latomic"
         case ${BUILD_TARGET} in
@@ -77,7 +77,7 @@ build_openssl() {
 
 build_libuv() {
     echo "=== Building libuv-${LIBUV_VERSION} (${TARGET})..."
-    curl -fSsLo- "https://dist.libuv.org/dist/v${LIBUV_VERSION}/libuv-v${LIBUV_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
+    curl --retry 3 --retry-delay 5 -fSsLo- "https://dist.libuv.org/dist/v${LIBUV_VERSION}/libuv-v${LIBUV_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
     pushd "${BUILD_DIR}/libuv-v${LIBUV_VERSION}"
         ./autogen.sh
         env CFLAGS=-fPIC ./configure --disable-shared --enable-static --prefix="${STAGE_DIR}" --host="${TARGET}"
@@ -103,7 +103,7 @@ EOF
 
 build_libwebsockets() {
     echo "=== Building libwebsockets-${LIBWEBSOCKETS_VERSION} (${TARGET})..."
-    curl -fSsLo- "https://github.com/warmcat/libwebsockets/archive/v${LIBWEBSOCKETS_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
+    curl --retry 3 --retry-delay 5 -fSsLo- "https://github.com/warmcat/libwebsockets/archive/v${LIBWEBSOCKETS_VERSION}.tar.gz" | tar xz -C "${BUILD_DIR}"
     pushd "${BUILD_DIR}/libwebsockets-${LIBWEBSOCKETS_VERSION}"
         sed -i 's/ websockets_shared//g' cmake/libwebsockets-config.cmake.in
         rm -rf build && mkdir -p build && cd build
